@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>你的边界防御图鉴</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background-color: #f0f2ea;
+    background-image: radial-gradient(#c2c6b8 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
+    color: #111; line-height: 1.6; min-height: 100vh;
+    display: flex; justify-content: center; padding: 30px 16px;
+  }
+  .app { width: 100%; max-width: 520px; position: relative; }
+  .hidden { display: none !important; }
+
+  .card {
+    background: #fff; border: 2px solid #111; border-radius: 8px;
+    box-shadow: 8px 8px 0px #b0f24c; position: relative; overflow: hidden; margin-bottom: 20px;
+  }
+  .color-bar { display: flex; height: 8px; width: 100%; }
+  .color-bar .c1 { background: #ef4444; flex: 1; }
+  .color-bar .c2 { background: #facc15; flex: 1; }
+  .color-bar .c3 { background: #a3e635; flex: 1; }
+  .color-bar .c4 { background: #38bdf8; flex: 1; }
+  .card-content { padding: 28px 24px; }
+
+  .title { font-size: 26px; font-weight: 900; text-align: center; letter-spacing: 1px; margin-bottom: 24px; }
+  .subtitle { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
+  .desc-small { font-size: 13px; color: #555; margin-bottom: 20px; font-weight: 500; }
+
+  .btn {
+    display: block; width: 100%; padding: 16px; font-size: 16px; font-weight: 800;
+    text-align: center; background: #fff; color: #111; border: 2px solid #111; border-radius: 4px;
+    cursor: pointer; box-shadow: 4px 4px 0px #111; transition: all 0.1s ease;
+  }
+  .btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0px #111; }
+  .btn-primary { background: #f76c5e; color: #111; }
+  .btn-action-group { margin-top: 24px; }
+
+  .q-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; font-size: 13px; font-weight: 800; color: #111;
+  }
+  .progress-bar-bg { flex: 1; height: 8px; background: #eee; border: 1px solid #111; border-radius: 4px; margin-left: 12px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #facc15; width: 0%; transition: width 0.3s ease; }
+
+  .q-box {
+    background: #fdf2f8; border: 2px solid #111; border-radius: 8px;
+    padding: 24px 20px; font-size: 15px; font-weight: 700;
+    margin-bottom: 30px; box-shadow: 4px 4px 0px #111; position: relative;
+    line-height: 1.7;
+  }
+  .q-box::before {
+    content: "“"; position: absolute; top: -10px; left: 10px;
+    font-size: 40px; color: #f76c5e; font-family: serif; font-weight: 900;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex; align-items: center; padding: 14px 16px;
+    background: #fff; border: 2px solid #111; border-radius: 6px;
+    cursor: pointer; box-shadow: 3px 3px 0px #111; transition: all 0.15s ease;
+  }
+  .option:active { transform: translate(3px, 3px); box-shadow: 0 0 0px #111; }
+  .option.selected { background: #bae6fd; }
+  .opt-letter { font-weight: 900; font-size: 16px; width: 24px; }
+  .opt-text { font-size: 14px; font-weight: 700; }
+
+  .back-btn {
+    background: transparent; border: none; color: #666; font-size: 13px;
+    font-weight: 700; padding: 10px; margin-top: 20px;
+    text-decoration: underline; cursor: pointer; width: 100%; text-align: center;
+  }
+
+  /* 结果页 */
+  .result-title-tag {
+    display: inline-block; padding: 6px 12px; font-size: 14px; font-weight: 800;
+    border: 2px solid #111; border-radius: 4px; margin-bottom: 16px; box-shadow: 2px 2px 0px #111;
+  }
+  .result-desc {
+    font-size: 14px; font-weight: 600; color: #333; margin-bottom: 16px;
+    padding: 16px; border: 2px solid #111; background: #fafafa; border-radius: 4px; line-height: 1.6;
+  }
+  .result-main-type { font-size: 22px; font-weight: 900; color: #111; margin-top: 10px; }
+  
+  /* 雷达图容器 */
+  .radar-container {
+    display: flex; justify-content: center; align-items: center;
+    margin: 24px 0; padding: 10px; background: #fff; border: 2px solid #111; border-radius: 8px;
+    box-shadow: 4px 4px 0px #facc15;
+  }
+  
+  /* 底部小数据 */
+  .dims-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .dim-box { border: 2px solid #111; padding: 10px; border-radius: 4px; background: #fff; }
+  .dim-box h5 { font-size: 12px; font-weight: 800; color: #333; }
+  .dim-box .val { font-size: 16px; font-weight: 900; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- 1. 开始页 -->
+  <div id="screen-start">
+    <div class="card">
+      <div class="color-bar"><div class="c1"></div><div class="c2"></div><div class="c3"></div><div class="c4"></div></div>
+      <div class="card-content">
+        <h1 class="title">你的边界防御图鉴</h1>
+        <div class="desc-small" style="text-align: center; font-weight: 700;">
+          市面上教人守护边界的书，多半按“职场/家庭”分类。<br>
+          但当你受伤的那一刻，最先感受到的是“我被那句话噎住了”。<br>
+          本测试按“冲突机制”分类，测出你正在经历哪种侵犯。
+        </div>
+        
+        <div style="background: #bae6fd; border: 2px solid #111; padding: 16px; border-radius: 4px; margin: 24px 0; box-shadow: 3px 3px 0px #111;">
+          <p style="font-size: 14px; font-weight: 800; margin-bottom: 8px;">🛡️ 六种边界侵犯机制：</p>
+          <p style="font-size: 13px; font-weight: 600; line-height: 1.6;">
+            1. 贬低与否定（你太敏感了）<br>
+            2. 义务与道德绑架（我都是为了你好）<br>
+            3. 越界与侵入（我就是随便问问）<br>
+            4. 权力压制与公开羞辱（这点事都做不好）<br>
+            5. 关系要挟与撤回（你再这样我就...）<br>
+            6. 隐性攻击与微侵犯（比上次强多了）
+          </p>
+        </div>
+        <p class="desc-small" style="text-align: center; color: #ef4444; font-weight: 800;">* 如果近期未发生，请全选“从未发生”，系统会判定你的边界非常健康。</p>
+
+        <button class="btn btn-primary" id="startBtn">开始检测</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 答题页 -->
+  <div id="screen-quiz" class="hidden">
+    <div class="card">
+      <div class="color-bar"><div class="c1"></div><div class="c2"></div><div class="c3"></div><div class="c4"></div></div>
+      <div class="card-content">
+        <div class="q-header">
+          <span id="q-num-text">01 / 24</span>
+          <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+        
+        <div class="q-box" id="q-text">加载中...</div>
+        <div class="options" id="options-container"></div>
+        <button class="back-btn hidden" id="backBtn">← 返回上一题</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 结果页 -->
+  <div id="screen-result" class="hidden">
+    <div class="card">
+      <div class="color-bar"><div class="c1"></div><div class="c2"></div><div class="c3"></div><div class="c4"></div></div>
+      <div class="card-content" id="result-content">
+        <!-- 动态渲染 -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- 题库设计 ---------------- */
+const RAW_QUESTIONS = [
+  // A. 贬低与否定
+  {type:"A", text:"当你表示不满时，对方回击：“你太敏感了，大家都没事，就你事多，开个玩笑而已。”"},
+  {type:"A", text:"你表达委屈时，对方说：“你想多了吧，我怎么觉得是你自己的问题？除了我没人受得了你。”"},
+  {type:"A", text:"你试图沟通，对方直接打断：“你就是这样的人，永远都改不了，别白费力气了。”"},
+  {type:"A", text:"对方开了一个让你很不舒服的玩笑，你生气后，对方说：“你怎么这么开不起玩笑？真没意思。”"},
+
+  // B. 义务与道德绑架
+  {type:"B", text:"你想拒绝对方的要求，对方说：“我都是为了你好，你怎么这么不识好歹？”"},
+  {type:"B", text:"你不愿帮忙时，对方叹气：“我为你付出了这么多，做人要懂得感恩，你现在居然这样对我。”"},
+  {type:"B", text:"当你想坚持自己的决定，对方指责：“一家人不说两家话，以前你不是这样的，你变了。”"},
+  {type:"B", text:"对方用“我养你这么大，让你听我一次话怎么了”来强迫你顺从，让你产生强烈的愧疚感。"},
+
+  // C. 越界与侵入
+  {type:"C", text:"对方过度打探你的隐私：“你一个月挣多少钱？我就是关心你，随便问问，别多想。”"},
+  {type:"C", text:"对方随意占用你的周末：“反正你周末也没事，顺便帮个忙嘛，你又干嘛这么计较？”"},
+  {type:"C", text:"未经你同意，对方擅自替你做决定或翻看你手机，当你生气时，对方说：“我又没别的意思。”"},
+  {type:"C", text:"对方在你明确表示不方便时，依然强行介入：“我就是顺路过来看看，你干嘛这么见外？”"},
+
+  // D. 权力压制
+  {type:"D", text:"开会时老板当众训斥你：“这点事都做不好，你看看别人！你自己心里没数吗？”"},
+  {type:"D", text:"长辈或领导用身份压人：“我说话你听着就行，别给脸不要脸。”"},
+  {type:"D", text:"聚餐时，有人当众开你玩笑让你下不来台，还补一句：“大家都看着呢，别破坏气氛。”"},
+  {type:"D", text:"面对强势的指责，你常常会大脑空白、发抖、脸红，事后才懊恼“当时我怎么没反驳”。"},
+
+  // E. 关系要挟
+  {type:"E", text:"你想坚持原则，对方威胁：“你要是不按我说的做，以后你的事我不管了。”"},
+  {type:"E", text:"发生冲突时，对方用沉默、冷战，或者甩下一句“随便你吧”“我无所谓”来惩罚你。"},
+  {type:"E", text:"对方逼你在“边界”和“关系”中二选一：“你选吧，要是不答应，我们就断绝关系。”"},
+  {type:"E", text:"对方用撤回资源、收回爱意或把你踢出群聊来要挟，逼你放弃自己的底线。"},
+
+  // F. 隐性攻击
+  {type:"F", text:"对方表面恭维夹带贬低：“你这次做得不错，比上次强多了，总算有点长进。”"},
+  {type:"F", text:"对方阴阳怪气或被动攻击：“没事，你不用管我，反正我一直都是多余的。”"},
+  {type:"F", text:"对方利用第三方传话：“XX也觉得你有点不太好相处，不过我觉得还好啦。”"},
+  {type:"F", text:"你经常感到被冒犯，但又说不清具体哪里不对，说出去怕显得自己太计较。"}
+];
+
+const OPTIONS = [
+  {letter:'A', value:0, text:'从未发生 / 完全没感觉'},
+  {letter:'B', value:1, text:'偶尔发生 / 轻微不适'},
+  {letter:'C', value:2, text:'经常发生 / 明显困扰'},
+  {letter:'D', value:3, text:'总是发生 / 极度痛苦'}
+];
+
+/* ---------------- 状态与DOM ---------------- */
+let currentIndex = 0;
+let answers = new Array(RAW_QUESTIONS.length).fill(null);
+let questions = [];
+let locked = false;
+
+const screenStart = document.getElementById('screen-start');
+const screenQuiz = document.getElementById('screen-quiz');
+const screenResult = document.getElementById('screen-result');
+const qNumText = document.getElementById('q-num-text');
+const qText = document.getElementById('q-text');
+const optionsContainer = document.getElementById('options-container');
+const progressFill = document.getElementById('progressFill');
+const backBtn = document.getElementById('backBtn');
+
+/* ---------------- 逻辑 ---------------- */
+document.getElementById('startBtn').addEventListener('click', () => {
+  screenStart.classList.add('hidden');
+  screenQuiz.classList.remove('hidden');
+  currentIndex = 0;
+  questions = [...RAW_QUESTIONS].sort(() => Math.random() - 0.5); // 打乱顺序
+  answers = new Array(questions.length).fill(null);
+  render();
+});
+
+function render() {
+  const q = questions[currentIndex];
+  const currentScore = answers[currentIndex];
+
+  qNumText.textContent = String(currentIndex + 1).padStart(2, '0') + ' / ' + questions.length;
+  progressFill.style.width = ((currentIndex + 1) / questions.length * 100) + '%';
+  qText.textContent = q.text;
+
+  optionsContainer.innerHTML = OPTIONS.map(o => `
+    <div class="option ${currentScore === o.value ? 'selected' : ''}" data-value="${o.value}">
+      <span class="opt-letter">${o.letter}</span>
+      <span class="opt-text">${o.text}</span>
+    </div>
+  `).join('');
+
+  const btnEls = optionsContainer.querySelectorAll('.option');
+  btnEls.forEach(el => {
+    el.addEventListener('click', () => selectScore(Number(el.dataset.value), btnEls));
+  });
+
+  if (currentIndex > 0) backBtn.classList.remove('hidden');
+  else backBtn.classList.add('hidden');
+}
+
+function selectScore(score, btnEls) {
+  if (locked) return;
+  locked = true;
+  answers[currentIndex] = score;
+  btnEls.forEach(el => el.classList.toggle('selected', Number(el.dataset.value) === score));
+
+  setTimeout(() => {
+    locked = false;
+    if (currentIndex < questions.length - 1) {
+      currentIndex++;
+      render();
+    } else {
+      showResult();
+    }
+  }, 300);
+}
+
+backBtn.addEventListener('click', () => {
+  if (currentIndex > 0) {
+    currentIndex--;
+    render();
+  }
+});
+
+/* ---------------- 计分与结果 ---------------- */
+function calc() {
+  let scores = { A:0, B:0, C:0, D:0, E:0, F:0 };
+  let totalScore = 0;
+  
+  questions.forEach((q, i) => {
+    const v = answers[i] || 0;
+    scores[q.type] += v;
+    totalScore += v;
+  });
+  
+  return { scores, totalScore };
+}
+
+const TYPE_DATA = {
+  A: { 
+    name: "被贬低与否定", color: "#fca5a5",
+    desc: "你正在经历煤气灯效应（Gaslighting）。对方的攻击被包装成了“你反应过度”，通过否定你的感受和判断，让你怀疑“是不是我太敏感”。",
+    action: "策略：不要陷入“我到底敏不敏感”的辩论。直接陈述事实：<br>“我不觉得这是玩笑，这句话让我很不舒服。请你停止。”"
+  },
+  B: {
+    name: "义务与道德绑架", color: "#fed7aa",
+    desc: "对方的杀伤力不在于逻辑，而在于向你强行注入“愧疚感”。对方用“付出”“感恩”把“愿意”偷换成了“义务”。",
+    action: "策略：把“义务”还原为“选择”。<br>“我理解你的心意，但这是我自己的决定。我选择不，并不代表我不爱你/不感恩。”"
+  },
+  C: {
+    name: "越界与侵入", color: "#fef08a",
+    desc: "对方未经同意进入你的物理/隐私/时间领地。越界者常常不认为自己越界，而是打着“关心”或“随便问问”的旗号。",
+    action: "策略：不要用“你越界了”这种判断句。使用公式：陈述事实+明确限度+替代选项。<br>“薪资是我的隐私，我不习惯聊这个。我们聊点别的吧。”"
+  },
+  D: {
+    name: "权力压制与公开羞辱", color: "#bfdbfe",
+    desc: "利用地位差或群体压力让你当众下不来台，用羞耻感迫使你顺从。你的身体会本能地出现心慌、大脑空白等应激反应。",
+    action: "策略：先稳住生理反应（深呼吸、停顿）。话术必须极短、极稳，甚至可以先只做非语言边界（直视不接话），再补短句：<br>“这个指责我不接受，会后我们再沟通。”"
+  },
+  E: {
+    name: "关系要挟与撤回", color: "#e9d5ff",
+    desc: "对方用“如果你不……我就……”逼迫你在“边界”和“关系”中二选一。威胁可能是冷战、收回资源或情绪惩罚。",
+    action: "策略：不进入对方的交换框架，把“威胁”降格为“信息”。<br>“如果你因为我不答应这件事就要结束关系，那这确实是一个信息。我尊重你的选择。”"
+  },
+  F: {
+    name: "隐性攻击与微侵犯", color: "#bbf7d0",
+    desc: "没有直接的狠话，只有阴阳怪气、夹带贬低或三角传话。你经常觉得不对劲，但又说不出口，怕显得自己太计较。",
+    action: "策略：命名机制，拒绝进入模糊地带，必要时事后记录。<br>“你刚才说‘比上次强多了’，听起来像是有弦外之音。你想表达什么？”"
+  }
+};
+
+function showResult() {
+  const r = calc();
+  const { scores, totalScore } = r;
+
+  screenQuiz.classList.add('hidden');
+  screenResult.classList.remove('hidden');
+  const resContainer = document.getElementById('result-content');
+
+  // 1. 完全健康状态
+  if (totalScore === 0) {
+    resContainer.innerHTML = `
+      <div style="text-align: center;">
+        <span class="result-title-tag" style="background: #bbf7d0;">🛡️ 防御成功</span>
+        <h2 style="font-size: 20px; font-weight: 900; margin-bottom: 16px;">边界健康，未发现明显侵犯</h2>
+      </div>
+      <div class="result-desc" style="background: #bbf7d0; text-align: left;">
+        你在所有维度的测试中均得 0 分，这意味着近期没有人对你使用贬低、绑架、越界、压制、要挟或隐性攻击的手段。<br><br>
+        要么是你周围的环境非常健康，要么是你拥有极其强大的边界感，早就把那些试图侵犯你的人挡在了门外。请继续保持！
+      </div>
+      <div class="btn-action-group">
+        <button class="btn" id="retryBtn" style="background: #fff;">重新测试</button>
+      </div>
+    `;
+    bindRetry();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  // 2. 计算高危类型
+  const sorted = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+  const mainType = sorted[0];
+  const subType = sorted[1];
+  const mainData = TYPE_DATA[mainType];
+
+  let levelLabel = "轻度试探";
+  let levelColor = "#fef08a";
+  if (scores[mainType] >= 7) { levelLabel = "重度侵犯 / 亟需干预"; levelColor = "#fca5a5"; }
+  else if (scores[mainType] >= 4) { levelLabel = "中度困扰"; levelColor = "#fed7aa"; }
+
+  // 渲染
+  resContainer.innerHTML = `
+    <div style="text-align: center;">
+      <span class="result-title-tag" style="background: ${levelColor};">边界检测报告</span>
+      <h2 style="font-size: 15px; font-weight: 800; color: #666; margin-bottom: 4px;">你主要面临的问题是</h2>
+      <div class="result-main-type">${mainData.name}</div>
+      <div style="font-size: 13px; font-weight: 800; color: #ef4444; margin-top: 6px;">程度：${levelLabel}</div>
+    </div>
+
+    <div class="result-desc" style="margin-top: 16px;">
+      <b>【机制拆解】</b><br>${mainData.desc}
+    </div>
+
+    <div class="result-desc" style="background: #bae6fd;">
+      <b>【破局话术】</b><br>${mainData.action}
+    </div>
+
+    ${scores[subType] > 0 ? `
+      <div class="result-desc" style="background: #fafafa;">
+        <b>【次要波及】${TYPE_DATA[subType].name}</b><br>
+        得分：${scores[subType]} 分。你也遇到了一些这种类型的摩擦，建议同样保持警惕。
+      </div>
+    ` : ''}
+
+    <h3 class="subtitle" style="margin-top: 24px;">📊 六维侵犯雷达图</h3>
+    
+    <!-- 雷达图容器 -->
+    <div class="radar-container">
+      <canvas id="radarChart"></canvas>
+    </div>
+
+    <div class="dims-grid">
+      ${Object.keys(TYPE_DATA).map(k => `
+        <div class="dim-box">
+          <h5>${TYPE_DATA[k].name}</h5>
+          <div class="val" style="color: ${scores[k] > 6 ? '#ef4444' : '#111'};">${scores[k]} <span style="font-size:12px;color:#666;">/ 12</span></div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="btn-action-group">
+      <button class="btn" id="retryBtn" style="background: #fff;">重新测试</button>
+    </div>
+  `;
+
+  // 绘制雷达图
+  setTimeout(() => { drawRadar(scores); }, 50);
+  
+  bindRetry();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function bindRetry() {
+  document.getElementById('retryBtn').addEventListener('click', () => {
+    screenResult.classList.add('hidden');
+    screenStart.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/* ---------------- 绘制带短名称的雷达图 ---------------- */
+function drawRadar(scores) {
+  const canvas = document.getElementById('radarChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  // 画布尺寸调大一点，容纳文字
+  const dpr = window.devicePixelRatio || 1;
+  const width = 320; 
+  const height = 300;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+  ctx.scale(dpr, dpr);
+  
+  const cx = width / 2;
+  const cy = height / 2;
+  const maxR = 80; // 半径稍微缩小，给外围文字留空间
+  const maxScore = 12; 
+  
+  // 6个轴的角度：正上方(-90°)，然后顺时针
+  const keys = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const angles = [-90, -30, 30, 90, 150, 210].map(deg => deg * Math.PI / 180);
+  
+  // 短名称映射
+  const shortLabels = {
+    A: '贬低否定',
+    B: '道德绑架',
+    C: '越界侵入',
+    D: '权力压制',
+    E: '关系要挟',
+    F: '隐性攻击'
+  };
+  
+  // 1. 画背景网格
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 1.5;
+  for (let i = 1; i <= 4; i++) {
+    const r = maxR * (i / 4);
+    ctx.beginPath();
+    for (let j = 0; j < 6; j++) {
+      const x = cx + r * Math.cos(angles[j]);
+      const y = cy + r * Math.sin(angles[j]);
+      if (j === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    if (i === 4) {
+      ctx.fillStyle = '#f9f9f9';
+      ctx.fill();
+    }
+    ctx.stroke();
+  }
+  
+  // 2. 画轴线
+  for (let j = 0; j < 6; j++) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + maxR * Math.cos(angles[j]), cy + maxR * Math.sin(angles[j]));
+    ctx.stroke();
+  }
+  
+  // 3. 画数据多边形
+  ctx.beginPath();
+  for (let j = 0; j < 6; j++) {
+    const score = scores[keys[j]] || 0;
+    const r = maxR * (score / maxScore);
+    const x = cx + r * Math.cos(angles[j]);
+    const y = cy + r * Math.sin(angles[j]);
+    if (j === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(247, 108, 94, 0.6)';
+  ctx.fill();
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  
+  // 4. 画顶点圆点
+  for (let j = 0; j < 6; j++) {
+    const score = scores[keys[j]] || 0;
+    const r = maxR * (score / maxScore);
+    const x = cx + r * Math.cos(angles[j]);
+    const y = cy + r * Math.sin(angles[j]);
+    ctx.beginPath();
+    ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  // 5. 绘制外围短名称标签
+  for (let j = 0; j < 6; j++) {
+    const angleDeg = [-90, -30, 30, 90, 150, 210][j];
+    const angle = angles[j];
+    const labelR = maxR + 24; // 文字离中心距离
+    
+    const x = cx + labelR * Math.cos(angle);
+    const y = cy + labelR * Math.sin(angle);
+
+    // 动态调整对齐方式与偏移
+    let align = 'center';
+    let baseline = 'middle';
+    let offsetY = 0;
+    
+    if (angleDeg === -90) { align = 'center'; baseline = 'bottom'; offsetY = -4; } // 正上
+    else if (angleDeg === -30) { align = 'left'; baseline = 'middle'; } // 右上
+    else if (angleDeg === 30) { align = 'left'; baseline = 'middle'; } // 右下
+    else if (angleDeg === 90) { align = 'center'; baseline = 'top'; offsetY = 4; } // 正下
+    else if (angleDeg === 150) { align = 'right'; baseline = 'middle'; } // 左下
+    else if (angleDeg === 210) { align = 'right'; baseline = 'middle'; } // 左上
+
+    ctx.textAlign = align;
+    ctx.textBaseline = baseline;
+    ctx.fillStyle = '#111';
+    ctx.font = '900 13px -apple-system, sans-serif';
+    
+    // 绘制文字
+    ctx.fillText(shortLabels[keys[j]], x, y + offsetY);
+  }
+}
+</script>
+
+</body>
+</html>
